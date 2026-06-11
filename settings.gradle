@@ -1,5 +1,7 @@
 pluginManagement {
     repositories {
+        maven { url = "https://architectury.dev" } // Прямой сервер Architectury
+        maven { url = "https://fabricmc.net" }     // Резервный сервер
         gradlePluginPortal()
         mavenCentral()
     }
