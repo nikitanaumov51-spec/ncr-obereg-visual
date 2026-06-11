@@ -13,7 +13,7 @@ repositories {
 
 dependencies {
     minecraft "com.mojang:minecraft:1.20.1"
-    mappings lodestone(minecraft.officialMojangMappings())
+    mappings minecraft.officialMojangMappings() // Железнобетонный ванильный маппинг Fabric
     modImplementation "net.fabricmc:fabric-loader:0.14.22"
     modImplementation "net.fabricmc.fabric-api:fabric-api:0.83.0+1.20.1"
 }
