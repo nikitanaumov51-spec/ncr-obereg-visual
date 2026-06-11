@@ -7,6 +7,8 @@ version = '1.0.0'
 group = 'com.ncr.obereg'
 
 repositories {
+    maven { url = "https://architectury.dev" }
+    maven { url = "https://fabricmc.net" }
     mavenCentral()
 }
 
