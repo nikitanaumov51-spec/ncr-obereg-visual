@@ -1,13 +1,24 @@
+buildscript {
+    repositories {
+        maven { url = "https://fabricmc.net" }
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath "net.fabricmc:fabric-loom:1.3-SNAPSHOT"
+    }
+}
+
 plugins {
-    id 'fabric-loom' version '1.3-SNAPSHOT'
     id 'maven-publish'
 }
+
+apply plugin: 'fabric-loom'
 
 version = '1.0.0'
 group = 'com.ncr.obereg'
 
 repositories {
-    maven { url = "https://maven.fabricmc.net/" }
+    maven { url = "https://fabricmc.net" }
     mavenCentral()
 }
 
