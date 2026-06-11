@@ -1,0 +1,27 @@
+name: NCR Mod Build
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build Mod with Gradle
+        run: gradle build
+
+      - name: Upload Finished Mod
+        uses: actions/upload-artifact@v4
+        with:
+          name: NCR_Obereg_Visual_Mod
+          path: build/libs/*.jar
