@@ -1,7 +1,18 @@
+buildscript {
+    repositories {
+        maven { url = "https://fabricmc.net" }
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath "dev.architectury:loom:1.7-SNAPSHOT"
+    }
+}
+
 plugins {
-    id 'fabric-loom' version '1.7-SNAPSHOT'
     id 'maven-publish'
 }
+
+apply plugin: 'dev.architectury.loom'
 
 version = '1.0.0'
 group = 'com.ncr.obereg'
@@ -13,7 +24,7 @@ repositories {
 
 dependencies {
     minecraft "com.mojang:minecraft:1.20.1"
-    mappings minecraft.officialMojangMappings() // Железнобетонный ванильный маппинг Fabric
+    mappings minecraft.officialMojangMappings()
     modImplementation "net.fabricmc:fabric-loader:0.14.22"
     modImplementation "net.fabricmc.fabric-api:fabric-api:0.83.0+1.20.1"
 }
