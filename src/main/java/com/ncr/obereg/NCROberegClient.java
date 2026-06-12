@@ -10,7 +10,6 @@ import net.minecraft.client.render.RenderLayer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.util.math.Vec3d;
-import org.joml.Matrix4f;
 
 public class NCROberegClient implements ClientModInitializer {
     @Override
@@ -46,14 +45,13 @@ public class NCROberegClient implements ClientModInitializer {
                     // Используем буфер полупрозрачных слоев (translucent), совместимый с Sodium
                     VertexConsumer buffer = bufferSource.getBuffer(RenderLayer.getTranslucent());
 
-                    // Подбираем цвет купол (RGBA)
+                    // Подбираем цвет купола (RGBA)
                     int r = 255, g = 200, b = 0, a = 45; // Золотой для Латуни (40)
                     if (radius == 15)  { r = 0; g = 255; b = 50; a = 45; }   // Зеленый для Дерева
                     if (radius == 70)  { r = 0; g = 150; b = 255; a = 45; }  // Голубой для Изумруда
                     if (radius == 100) { r = 255; g = 0; b = 0; a = 60; }    // Алый для Крови
 
                     poseStack.pushPose();
-                    Matrix4f matrix = poseStack.peek().getPositionMatrix();
                     
                     // Алгоритм 3D-сферы из 32 сегментов
                     int segments = 32;
@@ -77,11 +75,11 @@ public class NCROberegClient implements ClientModInitializer {
                             double x1 = Math.cos(lng1);
                             double z1 = Math.sin(lng1);
 
-                            // Отрисовка 3D полигонов сферы купола в OpenGL с явным указанием endVertex() и матрицы JOML
-                            buffer.vertex(matrix, (float) (x + r0 * x0), (float) (y + y0), (float) (z + r0 * z0)).color(r, g, b, a).next();
-                            buffer.vertex(matrix, (float) (x + r0 * x1), (float) (y + y0), (float) (z + r0 * z1)).color(r, g, b, a).next();
-                            buffer.vertex(matrix, (float) (x + r1 * x1), (float) (y + y1), (float) (z + r1 * z1)).color(r, g, b, a).next();
-                            buffer.vertex(matrix, (float) (x + r1 * x0), (float) (y + y1), (float) (z + r1 * z0)).color(r, g, b, a).next();
+                            // Отрисовка 3D полигонов сферы купола по чистым double координатам без проброса матриц PoseStack
+                            buffer.vertex((x + r0 * x0), (y + y0), (z + r0 * z0)).color(r, g, b, a).next();
+                            buffer.vertex((x + r0 * x1), (y + y0), (z + r0 * z1)).color(r, g, b, a).next();
+                            buffer.vertex((x + r1 * x1), (y + y1), (z + r1 * z1)).color(r, g, b, a).next();
+                            buffer.vertex((x + r1 * x0), (y + y1), (z + r1 * z0)).color(r, g, b, a).next();
                         }
                     }
 
