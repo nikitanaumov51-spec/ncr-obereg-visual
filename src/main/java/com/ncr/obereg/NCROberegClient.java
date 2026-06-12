@@ -2,28 +2,29 @@ package com.ncr.obereg;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.MinecraftClient;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.world.entity.decoration.ArmorStand;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.decoration.ArmorStandEntity;
+import net.minecraft.util.math.Vec3d;
 
 public class NCROberegClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
-        // Подключаемся к низкоуровневой шине рендеринга кадра Fabric LAST
+        // Подключаемся к низкоуровневой шине рендеринга Fabric LAST
         WorldRenderEvents.LAST.register(context -> {
-            Minecraft client = Minecraft.getInstance();
-            if (client.level == null || client.player == null) return;
+            MinecraftClient client = MinecraftClient.getInstance();
+            if (client.world == null || client.player == null) return;
 
-            // Сканируем Armor Stand в радиусе видимости клиента
-            for (net.minecraft.world.entity.Entity entity : client.level.entitiesForRendering()) {
-                if (entity instanceof ArmorStand stand && stand.getTags().contains("ncr_obereg")) {
+            // Нативный Yarn-перебор сущностей в мире клиента
+            for (Entity entity : client.world.getEntities()) {
+                if (entity instanceof ArmorStandEntity stand && stand.getScoreboardTags().contains("ncr_obereg")) {
                     
                     int radius = 15;
-                    for (String tag : stand.getTags()) {
+                    for (String tag : stand.getScoreboardTags()) {
                         if (tag.startsWith("radius_")) {
                             try {
                                 radius = Integer.parseInt(tag.replace("radius_", ""));
@@ -31,18 +32,18 @@ public class NCROberegClient implements ClientModInitializer {
                         }
                     }
 
-                    // Считаем позицию относительно камеры игрока
-                    Vec3 cameraPos = context.camera().getPosition();
+                    // Считаем позицию относительно камеры
+                    Vec3d cameraPos = context.camera().getPos();
                     double x = stand.getX() - cameraPos.x;
                     double y = stand.getY() - cameraPos.y + 0.1;
                     double z = stand.getZ() - cameraPos.z;
 
                     PoseStack poseStack = context.matrixStack();
-                    // Извлекаем буфер напрямую из контекста события Fabric (решает проблему конфликта маппингов!)
-                    MultiBufferSource bufferSource = context.consumers();
+                    VertexConsumerProvider bufferSource = context.consumers();
                     if (bufferSource == null) return;
                     
-                    VertexConsumer buffer = bufferSource.getBuffer(RenderType.translucent());
+                    // Используем буфер полупрозрачных слоев (translucent), совместимый с Sodium
+                    VertexConsumer buffer = bufferSource.getBuffer(RenderLayer.getTranslucent());
 
                     // Подбираем цвет купола (RGBA)
                     int r = 255, g = 200, b = 0, a = 45; // Золотой для Латуни (40)
@@ -75,17 +76,16 @@ public class NCROberegClient implements ClientModInitializer {
                             double z1 = Math.sin(lng1);
 
                             // Отрисовка 3D полигонов сферы купола в OpenGL
-                            buffer.vertex(poseStack.last().pose(), (float) (x + r0 * x0), (float) (y + y0), (float) (z + r0 * z0)).color(r, g, b, a).endVertex();
-                            buffer.vertex(poseStack.last().pose(), (float) (x + r0 * x1), (float) (y + y0), (float) (z + r0 * z1)).color(r, g, b, a).endVertex();
-                            buffer.vertex(poseStack.last().pose(), (float) (x + r1 * x1), (float) (y + y1), (float) (z + r1 * z1)).color(r, g, b, a).endVertex();
-                            buffer.vertex(poseStack.last().pose(), (float) (x + r1 * x0), (float) (y + y1), (float) (z + r1 * z0)).color(r, g, b, a).endVertex();
+                            buffer.vertex(poseStack.last().pose(), (float) (x + r0 * x0), (float) (y + y0), (float) (z + r0 * z0)).color(r, g, b, a).next();
+                            buffer.vertex(poseStack.last().pose(), (float) (x + r0 * x1), (float) (y + y0), (float) (z + r0 * z1)).color(r, g, b, a).next();
+                            buffer.vertex(poseStack.last().pose(), (float) (x + r1 * x1), (float) (y + y1), (float) (z + r1 * z1)).color(r, g, b, a).next();
+                            buffer.vertex(poseStack.last().pose(), (float) (x + r1 * x0), (float) (y + y1), (float) (z + r1 * z0)).color(r, g, b, a).next();
                         }
                     }
 
                     poseStack.popPose();
                 }
             }
-        }
-    );
+        });
     }
 }
